@@ -2,16 +2,17 @@ package com.clinica.estetica.controller;
 
 import com.clinica.estetica.model.Paciente;
 import com.clinica.estetica.service.PacienteService;
-
 import io.swagger.annotations.ApiOperation;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/pacientes")
@@ -20,64 +21,119 @@ public class PacienteController {
     @Autowired
     private PacienteService pacienteService;
 
+    private ResponseEntity<?> gerarRespostaSucesso(Object data, String mensagem, HttpStatus status) {
+        Map<String, Object> resposta = new HashMap<>();
+        resposta.put("codigo", status.value());
+        resposta.put("mensagem", mensagem);
+        resposta.put("data", data);
+        return ResponseEntity.status(status).body(resposta);
+    }
+
+    private ResponseEntity<?> gerarRespostaErro(String mensagem, HttpStatus status) {
+        Map<String, String> respostaErro = new HashMap<>();
+        respostaErro.put("codigo", String.valueOf(status.value()));
+        respostaErro.put("mensagem", mensagem);
+        return ResponseEntity.status(status).body(respostaErro);
+    }
+
     @ApiOperation(value = "Criar um novo paciente", response = Paciente.class)
     @PostMapping
-    public ResponseEntity<Paciente> cadastrarPaciente(@Validated @RequestBody Paciente paciente) {
-        Paciente novoPaciente = pacienteService.cadastrarPaciente(paciente);
-        return ResponseEntity.ok(novoPaciente);
+    public ResponseEntity<?> cadastrarPaciente(@Validated @RequestBody Paciente paciente) {
+        try {
+            Paciente novoPaciente = pacienteService.cadastrarPaciente(paciente);
+            return gerarRespostaSucesso(novoPaciente, "Paciente criado com sucesso", HttpStatus.CREATED);
+        } catch (Exception e) {
+            return gerarRespostaErro("Erro ao criar o paciente: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    @ApiOperation(value = "Listar tods os pacientes", response = Paciente.class)
+    @ApiOperation(value = "Listar todos os pacientes", response = Paciente.class)
     @GetMapping
-    public ResponseEntity<List<Paciente>> listarPacientes() {
-        List<Paciente> pacientes = pacienteService.listarPacientes();
-        return ResponseEntity.ok(pacientes);
+    public ResponseEntity<?> listarPacientes() {
+        try {
+            List<Paciente> pacientes = pacienteService.listarPacientes();
+            return gerarRespostaSucesso(pacientes, "Lista de pacientes", HttpStatus.OK);
+        } catch (Exception e) {
+            return gerarRespostaErro("Erro ao listar pacientes: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    @ApiOperation(value = "Buscar pacientes por ID", response = Paciente.class)
+    @ApiOperation(value = "Buscar paciente por ID", response = Paciente.class)
     @GetMapping("/{id}")
-    public ResponseEntity<Paciente> buscarPacientePorId(@PathVariable Long id) {
-        Paciente paciente = pacienteService.buscarPacientePorId(id);
-        return ResponseEntity.ok(paciente);
+    public ResponseEntity<?> buscarPacientePorId(@PathVariable Long id) {
+        try {
+            Paciente paciente = pacienteService.buscarPacientePorId(id);
+            if (paciente != null) {
+                return gerarRespostaSucesso(paciente, "Paciente encontrado", HttpStatus.OK);
+            } else {
+                return gerarRespostaErro("Paciente não encontrado", HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            return gerarRespostaErro("Erro ao buscar paciente: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @ApiOperation(value = "Atualizar o paciente", response = Paciente.class)
     @PutMapping("/{id}")
-    public ResponseEntity<Paciente> atualizarPaciente(@PathVariable Long id, @Validated @RequestBody Paciente paciente) {
-        Paciente pacienteAtualizado = pacienteService.atualizarPaciente(id, paciente);
-        return ResponseEntity.ok(pacienteAtualizado);
+    public ResponseEntity<?> atualizarPaciente(@PathVariable Long id, @Validated @RequestBody Paciente paciente) {
+        try {
+            Paciente pacienteAtualizado = pacienteService.atualizarPaciente(id, paciente);
+            if (pacienteAtualizado != null) {
+                return gerarRespostaSucesso(pacienteAtualizado, "Paciente atualizado com sucesso", HttpStatus.OK);
+            } else {
+                return gerarRespostaErro("Paciente não encontrado", HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            return gerarRespostaErro("Erro ao atualizar o paciente: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @ApiOperation(value = "Deletar um paciente")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removerPaciente(@PathVariable Long id) {
-        pacienteService.removerPaciente(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> removerPaciente(@PathVariable Long id) {
+        try {
+            pacienteService.removerPaciente(id);
+            return gerarRespostaSucesso(null, "Paciente removido com sucesso", HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return gerarRespostaErro("Erro ao remover paciente: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    @ApiOperation(value = "Pesquisar o paciente pelo Nome", response = Paciente.class)
+    @ApiOperation(value = "Pesquisar pacientes por nome", response = Paciente.class)
     @GetMapping("/nome/{nome}")
-    public ResponseEntity<List<Paciente>> buscarPacientesPorNome(@PathVariable String nome) {
-        List<Paciente> pacientes = pacienteService.buscarPacientesPorNome(nome);
-        return ResponseEntity.ok(pacientes);
+    public ResponseEntity<?> buscarPacientesPorNome(@PathVariable String nome) {
+        try {
+            List<Paciente> pacientes = pacienteService.buscarPacientesPorNome(nome);
+            return gerarRespostaSucesso(pacientes, "Pacientes encontrados", HttpStatus.OK);
+        } catch (Exception e) {
+            return gerarRespostaErro("Erro ao buscar pacientes: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    @ApiOperation(value = "Pesquisar o paciente pelo sexo", response = Paciente.class)
+    @ApiOperation(value = "Pesquisar pacientes por sexo", response = Paciente.class)
     @GetMapping("/sexo/{sexo}")
-    public ResponseEntity<List<Paciente>> buscarPacientesPorSexo(@PathVariable String sexo) {
-        List<Paciente> pacientes = pacienteService.buscarPacientesPorSexo(sexo);
-        return ResponseEntity.ok(pacientes);
+    public ResponseEntity<?> buscarPacientesPorSexo(@PathVariable String sexo) {
+        try {
+            List<Paciente> pacientes = pacienteService.buscarPacientesPorSexo(sexo);
+            return gerarRespostaSucesso(pacientes, "Pacientes encontrados", HttpStatus.OK);
+        } catch (Exception e) {
+            return gerarRespostaErro("Erro ao buscar pacientes: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    @ApiOperation(value = "Pesquisar o paciente pela data de cadastro", response = Paciente.class)
+    @ApiOperation(value = "Pesquisar pacientes pela data de cadastro", response = Paciente.class)
     @GetMapping("/data-cadastro")
-    public ResponseEntity<List<Paciente>> buscarPacientesPorDataCadastro(
+    public ResponseEntity<?> buscarPacientesPorDataCadastro(
             @RequestParam String dataInicio,
             @RequestParam String dataFim) {
-        List<Paciente> pacientes = pacienteService.buscarPacientesPorDataCadastro(
-                LocalDate.parse(dataInicio),
-                LocalDate.parse(dataFim)
-        );
-        return ResponseEntity.ok(pacientes);
+        try {
+            List<Paciente> pacientes = pacienteService.buscarPacientesPorDataCadastro(
+                    LocalDate.parse(dataInicio),
+                    LocalDate.parse(dataFim)
+            );
+            return gerarRespostaSucesso(pacientes, "Pacientes encontrados", HttpStatus.OK);
+        } catch (Exception e) {
+            return gerarRespostaErro("Erro ao buscar pacientes: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
