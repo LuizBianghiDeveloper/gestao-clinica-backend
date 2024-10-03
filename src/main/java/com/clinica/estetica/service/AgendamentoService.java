@@ -31,7 +31,6 @@ public class AgendamentoService {
         Agendamento existente = buscarAgendamentoPorId(id);
         existente.setDataHora(agendamento.getDataHora());
         existente.setPaciente(agendamento.getPaciente());
-        //existente.setProcedimento(agendamento.getProcedimento());
         return agendamentoRepository.save(existente);
     }
 

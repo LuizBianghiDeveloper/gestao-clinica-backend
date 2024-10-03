@@ -14,22 +14,18 @@ public class ProfissionalService {
     @Autowired
     private ProfissionalRepository profissionalRepository;
 
-    // Criar ou atualizar profissional
     public Profissional criarProfissional(Profissional profissional) {
         return profissionalRepository.save(profissional);
     }
 
-    // Listar todos os profissionais
     public List<Profissional> listarProfissionais() {
         return profissionalRepository.findAll();
     }
 
-    // Buscar profissional por ID
     public Optional<Profissional> buscarProfissionalPorId(Long id) {
         return profissionalRepository.findById(id);
     }
 
-    // Atualizar profissional
     public Optional<Profissional> atualizarProfissional(Long id, Profissional profissionalAtualizado) {
         if (profissionalRepository.existsById(id)) {
             profissionalAtualizado.setIdProfissional(id); 
@@ -38,7 +34,6 @@ public class ProfissionalService {
         return Optional.empty();
     }
 
-    // Deletar profissional
     public boolean deletarProfissional(Long id) {
         if (profissionalRepository.existsById(id)) {
             profissionalRepository.deleteById(id);

@@ -8,9 +8,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Serviço responsável pelas operações de lógica de negócio da entidade Paciente.
- */
 @Service
 public class PacienteService {
 

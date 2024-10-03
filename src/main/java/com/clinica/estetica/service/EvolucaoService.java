@@ -42,8 +42,4 @@ public class EvolucaoService {
     public List<Evolucao> buscarEvolucoesPorPaciente(Long pacienteId) {
         return evolucaoRepository.findByPacienteIdPaciente(pacienteId);
     }
-
-//    public List<Evolucao> buscarEvolucoesPorData(java.time.LocalDate dataInicio, java.time.LocalDate dataFim) {
-//        return evolucaoRepository.findByDataEvolucaoBetween(dataInicio, dataFim);
-//    }
 }
